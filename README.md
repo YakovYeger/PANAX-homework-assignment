@@ -1,2 +1,15 @@
 # PANAX-homework-assignment
-PANAX developer take home assignment
+
+
+# Steps to run: 
+1) enter root dir
+2) docker compose up dev-db -d
+3) npm i
+4) npm run start-dev
+
+
+# Assumptions
+1) CSV file may contain millions of records, using stream to process records row by row but would prefer to be done with chunks
+2) If a transaction does not contain a reference number it will not be unique
+3) Update route returns all records that were processed whether they are added or only updated
+4) 
