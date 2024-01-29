@@ -9,7 +9,7 @@
 
 
 # Assumptions
-1) CSV file may contain millions of records, using stream to process records row by row but would prefer to be done with chunks
+1) CSV file may contain millions of records, using stream to process records row by row
 2) If a transaction does not contain a reference number it will not be unique
-3) Update route returns all records that were processed whether they are added or only updated
+3) Update route returns all processed records whether they are added or only updated
 4) 
