@@ -12,21 +12,21 @@ export interface TransactionInterface {
     created_at?: Date
 }
 
-export const CsvTransactionMap = {
+export const CsvToTableTransactionMap = {
     ["Account Mask"]: 'account_mask',
+    ['Posted Date']: 'posted_date',
     'Description': 'description',
     'Details': 'details',
     'Amount': 'amount',
     'Balance': 'balance',
     ['Reference Number']: 'reference_number',
-    ['Posted Date']: 'posted_date',
     'currency': 'currency',
     'type': 'type',
 } as const;
 
-export type TransactionCsvKeys = keyof typeof CsvTransactionMap;
+export type TransactionCsvKeys = keyof typeof CsvToTableTransactionMap;
 
-export type TransactionTableKeys = (typeof CsvTransactionMap)[TransactionCsvKeys];
+export type TransactionTableKeys = (typeof CsvToTableTransactionMap)[TransactionCsvKeys];
 
 export type TransactionObject = Record<TransactionTableKeys, string>;
 

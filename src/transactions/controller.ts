@@ -2,7 +2,7 @@ import {fetchTransactions, upsertTransaction} from "./model";
 import {Request, Response} from "express";
 import csv from 'csv-parser'
 import fs from 'fs'
-import {TransactionCsvKeys, CsvTransactionMap, TransactionTableKeys, TransactionObject, QueryValue} from "./types";
+import {CsvToTableTransactionMap, QueryValue, TransactionCsvKeys, TransactionObject, TransactionTableKeys} from "./types";
 
 const referenceNumber = 'reference_number';
 
@@ -19,7 +19,7 @@ export const uploadTransactionsFromCSV = async (req: Request, res: Response) => 
     const file = req.file?.path ?? '';
 
     try {
-        const results = await streamTransactionsFromCSV(file);
+        const results = await uploadTransactionsFromFile(file);
         res.status(200).send({
             status: 'Success',
             data: results,
@@ -28,7 +28,7 @@ export const uploadTransactionsFromCSV = async (req: Request, res: Response) => 
     } catch (e) {
         res.status(500).send({
             status: 'Failed',
-            message: `Failed to upload csv data`
+            message: `Failed to upload csv data: ${(e as Error)?.message}`
         });
     }
 }
@@ -38,19 +38,29 @@ const processDataIntoTransaction = (data: Record<TransactionTableKeys, string | 
     if (data[referenceNumber] === "") {
         data[referenceNumber] = null
     }
-    return Object.values(data)
+    return Object.values(data);
 }
 
-const streamTransactionsFromCSV = async (filePath: string): Promise<TransactionObject[]> => {
+const isValidTransactionHeaders = (headers: string[]): boolean => {
+    return headers.toString() === Object.values(CsvToTableTransactionMap).toString()
+}
+
+const uploadTransactionsFromFile = async (filePath: string): Promise<TransactionObject[]> => {
     const results: Record<TransactionTableKeys, string>[] = [];
 
     return new Promise<TransactionObject[]>((resolve, reject) => {
         fs.createReadStream(filePath)
             .pipe(csv({
                 mapHeaders: ({header}) => {
-                    return CsvTransactionMap[header as TransactionCsvKeys]
+                    return CsvToTableTransactionMap[header as TransactionCsvKeys]
                 }
             }))
+            .on('headers', (headers) => {
+                if(!isValidTransactionHeaders(headers)){
+                    reject(new Error('invalid headers'))
+                    console.error('invalid headers')
+                };
+            })
             .on('data', (data) => {
                 const transaction = processDataIntoTransaction(data);
                 results.push(data);
